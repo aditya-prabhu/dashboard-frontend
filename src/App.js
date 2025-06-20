@@ -5,7 +5,6 @@ import Grid from '@mui/joy/Grid';
 import Box from '@mui/joy/Box';
 import React, { useState } from 'react';
 
-// ...existing imports...
 function App() {
   const [selectedProject, setSelectedProject] = useState("");
   const [selectedRelease, setSelectedRelease] = useState(null);
