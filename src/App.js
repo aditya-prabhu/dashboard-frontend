@@ -1,25 +1,31 @@
-import logo from './logo.svg';
+import Navbar from './components/Navbar';
+import PipelinesTable from './components/PipelinesTable';
 import './App.css';
+import Grid from '@mui/joy/Grid';
+import Box from '@mui/joy/Box';
+import React, { useState } from 'react';
 
+// ...existing imports...
 function App() {
+  const [selectedProject, setSelectedProject] = useState("");
+  const [selectedRelease, setSelectedRelease] = useState(null);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Grid container spacing={2} sx={{ minHeight: "100vh", p: 2 }}>
+      <Grid xs={12}>
+        <Navbar
+          selectedProject={selectedProject}
+          setSelectedProject={setSelectedProject}
+          selectedRelease={selectedRelease}
+          setSelectedRelease={setSelectedRelease}
+        />
+      </Grid>
+      <Grid xs={12}>
+        <Box sx={{ p: 2, background: "#fafafa", borderRadius: 2 }}>
+          <PipelinesTable project={selectedProject} release={selectedRelease} />
+        </Box>
+      </Grid>
+    </Grid>
   );
 }
-
 export default App;
