@@ -9,7 +9,7 @@ import Option from "@mui/joy/Option";
 import ProjectDropdown from "./ProjectDropdown";
 
 export default function CreateProjectForm() {
-  const [mode, setMode] = useState("create"); // "create" or "update"
+  const [mode, setMode] = useState("create");
   const [projectName, setProjectName] = useState("");
   const [pipelines, setPipelines] = useState("");
   const [releases, setReleases] = useState("");
@@ -18,7 +18,6 @@ export default function CreateProjectForm() {
   const [message, setMessage] = useState("");
   const [isUpdate, setIsUpdate] = useState(false);
 
-  // Handle dropdown selection for update mode
   const handleProjectSelect = async (selectedProject) => {
     if (!selectedProject) {
       setProjectName("");
@@ -71,7 +70,6 @@ export default function CreateProjectForm() {
     }
   };
 
-  // Reset form when switching mode
   const handleModeChange = (event, newValue) => {
     setMode(newValue);
     setMessage("");
