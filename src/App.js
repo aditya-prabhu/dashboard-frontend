@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from './components/Navbar';
 import PipelinesTable from './components/PipelinesTable';
+import Workitem from './components/Workitem
 import CreateProjectForm from './components/CreateProjectForm';
 import './App.css';
 import Grid from '@mui/joy/Grid';
@@ -36,6 +37,20 @@ function App() {
             </Grid>
           }
         />
+      </Grid>
+      <Grid xs={12} md={6}>
+        <Box sx={{ p: 2, background: "#fafafa", borderRadius: 2, height: '70vh', overflow: 'auto' }}>
+          <h2>Pipelines</h2>
+          <PipelinesTable project={selectedProject} release={selectedRelease} />
+        </Box>
+      </Grid>
+      <Grid xs={12} md={6}>
+        <Box sx={{ p: 2, background: "#fafafa", borderRadius: 2, height: '70vh', overflow: 'auto' }}>
+          <h2>Work Items</h2>
+          <Workitem project={selectedProject} release={selectedRelease} />
+        </Box>
+      </Grid>
+    </Grid>
       </Routes>
     </Router>
   );
