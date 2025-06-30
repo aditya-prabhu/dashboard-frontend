@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import Table from '@mui/joy/Table';
 import Link from '@mui/joy/Link';
+import CircularProgress from '@mui/joy/CircularProgress';
+import Box from '@mui/joy/Box';
 import { useNavigate } from "react-router-dom";
 import { API_BASE } from "../api/endpoints";
 
 function PipelinesTable({ project, release }) {
   const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -13,6 +16,7 @@ function PipelinesTable({ project, release }) {
       setRows([]);
       return;
     }
+    setLoading(true);
     const startDate = release.startDate;
     const endDate = release.finishDate;
     const url = `${API_BASE}/api/pipelines?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&project=${encodeURIComponent(project)}`;
@@ -22,7 +26,9 @@ function PipelinesTable({ project, release }) {
         const pipelinesArray = Array.isArray(data) ? data : [data];
         const uniquePipelines = filterUniquePipelines(pipelinesArray);
         setRows(uniquePipelines);
-      });
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, [project, release]);
 
   const filterUniquePipelines = (pipelines) => {
@@ -36,6 +42,14 @@ function PipelinesTable({ project, release }) {
       return false;
     });
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Table
