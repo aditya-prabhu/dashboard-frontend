@@ -3,6 +3,7 @@ import ProjectDropdown from "./ProjectDropdown";
 import ReleaseDropdown from "./ReleaseDropdown";
 import Box from '@mui/joy/Box';
 import Sheet from '@mui/joy/Sheet';
+import { API_BASE } from "../api/endpoints";
 
 function Navbar({
   selectedProject,
@@ -11,7 +12,7 @@ function Navbar({
   setSelectedRelease
 }) {
   const releaseApiUrl = selectedProject
-    ? `http://localhost:8000/api/releases?project=${selectedProject}`
+    ? `${API_BASE}/api/iterations?project=${selectedProject}`
     : "";
 
   return (
@@ -31,7 +32,7 @@ function Navbar({
     >
       <Box>
         <ProjectDropdown
-          apiUrl="http://localhost:8000/api/projects"
+          apiUrl={`${API_BASE}/api/projects`}
           onSelect={setSelectedProject}
           value={selectedProject}
         />

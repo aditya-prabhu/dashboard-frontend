@@ -6,7 +6,7 @@ import Textarea from "@mui/joy/Textarea";
 import Typography from "@mui/joy/Typography";
 import Select from "@mui/joy/Select";
 import Option from "@mui/joy/Option";
-import ProjectDropdown from "./ProjectDropdown";
+import ProjectDropdown from "../components/ProjectDropdown";
 
 export default function CreateProjectForm() {
   const [mode, setMode] = useState("create");

@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import PipelinesTable from './components/PipelinesTable';
 import Workitem from './components/Workitem';
-import CreateProjectForm from './components/CreateProjectForm';
+import CreateProjectForm from './pages/CreateProjectForm';
+import PipelineDetails from './pages/PipelineDetails';
 import './App.css';
 import Grid from '@mui/joy/Grid';
 import Box from '@mui/joy/Box';
@@ -12,7 +13,7 @@ function App() {
   const [selectedProject, setSelectedProject] = useState('');
   const [selectedRelease, setSelectedRelease] = useState(null);
   console.log('selectedRelease:', selectedRelease);
-
+  
   return (
     <Router>
       <Routes>
@@ -44,6 +45,7 @@ function App() {
             </Grid>
           }
         />
+        <Route path="/pipeline-details/:definitionId" element={<PipelineDetails />} />
       </Routes>
     </Router>
   );
