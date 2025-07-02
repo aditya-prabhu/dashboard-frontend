@@ -5,7 +5,7 @@ import PipelinesTable from './components/PipelinesTable';
 import Workitem from './components/Workitem';
 import CreateProjectForm from './pages/CreateProjectForm';
 import PipelineDetails from './pages/PipelineDetails';
-import PendingApprovals from './components/PendingApprovals'; // <-- Import the new component
+import PendingApprovals from './components/PendingApprovals';
 import './App.css';
 import Grid from '@mui/joy/Grid';
 import Box from '@mui/joy/Box';
@@ -16,23 +16,24 @@ function App() {
 
   const showContent = selectedProject && selectedRelease;
 
-  return (
-    <Router>
-      <Routes>
-        <Route path="/create-project" element={<CreateProjectForm />} />
-        <Route
-          path="/"
-          element={
-            showContent ? (
-              <Grid container spacing={2} sx={{ minHeight: '100vh', p: 2 }}>
-                <Grid xs={12}>
-                  <Navbar
-                    selectedProject={selectedProject}
-                    setSelectedProject={setSelectedProject}
-                    selectedRelease={selectedRelease}
-                    setSelectedRelease={setSelectedRelease}
-                  />
-                </Grid>
+return (
+  <Router>
+    <Routes>
+      <Route path="/create-project" element={<CreateProjectForm />} />
+      <Route
+        path="/"
+        element={
+          <Grid container spacing={2} sx={{ minHeight: '100vh', p: 2 }}>
+            <Grid xs={12}>
+              <Navbar
+                selectedProject={selectedProject}
+                setSelectedProject={setSelectedProject}
+                selectedRelease={selectedRelease}
+                setSelectedRelease={setSelectedRelease}
+              />
+            </Grid>
+            {showContent ? (
+              <>
                 <Grid xs={12}>
                   <PendingApprovals
                     startDate={selectedRelease?.startDate}
@@ -52,32 +53,33 @@ function App() {
                     <Workitem project={selectedProject} release={selectedRelease} />
                   </Box>
                 </Grid>
-              </Grid>
+              </>
             ) : (
-              // Centered Navbar when not both selected
-              <Box
-                sx={{
-                  minHeight: '100vh',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: '#fafafa'
-                }}
-              >
-                <Navbar
-                  selectedProject={selectedProject}
-                  setSelectedProject={setSelectedProject}
-                  selectedRelease={selectedRelease}
-                  setSelectedRelease={setSelectedRelease}
-                />
-              </Box>
-            )
-          }
-        />
-        <Route path="/pipeline-details/:definitionId" element={<PipelineDetails />} />
-      </Routes>
-    </Router>
-  );
+              <Grid xs={12}>
+                <Box
+                  sx={{
+                    minHeight: '60vh',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#fafafa'
+                  }}
+                >
+                  <span>
+                    {selectedProject
+                      ? "Please select a release to view dashboard details."
+                      : "Please select a project and release to begin."}
+                  </span>
+                </Box>
+              </Grid>
+            )}
+          </Grid>
+        }
+      />
+      <Route path="/pipeline-details/:definitionId" element={<PipelineDetails />} />
+    </Routes>
+  </Router>
+);
 }
 
 export default App;
