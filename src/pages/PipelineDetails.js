@@ -24,7 +24,7 @@ function PipelineDetails() {
       });
   }, [definitionId, startDate, finishDate, projectName]);
 
-  const pipelineName = rows.length > 0 ? rows[0].name : "";
+  const pipelineName = rows.length > 0 ? rows[0].pipelineName : "";
   const pipelineUrl = rows.length > 0 ? rows[0].pipelineUrl : "";
 
   return (
@@ -52,7 +52,7 @@ function PipelineDetails() {
       >
         <thead>
           <tr>
-            <th>Release ID</th>
+            <th>Release Name</th>
             <th>Created On</th>
             <th>Description</th>
             <th>Release Link</th>
@@ -62,7 +62,7 @@ function PipelineDetails() {
         <tbody>
           {rows.map((row, idx) => (
             <tr key={row.releaseId || idx}>
-              <td>{row.name}</td>
+              <td>{row.releaseName}</td>
               <td>{new Date(row.createdOn).toLocaleString()}</td>
               <td style={{
                 whiteSpace: "normal",
