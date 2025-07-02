@@ -5,6 +5,7 @@ import PipelinesTable from './components/PipelinesTable';
 import Workitem from './components/Workitem';
 import CreateProjectForm from './pages/CreateProjectForm';
 import PipelineDetails from './pages/PipelineDetails';
+import PendingApprovals from './components/PendingApprovals'; // <-- Import the new component
 import './App.css';
 import Grid from '@mui/joy/Grid';
 import Box from '@mui/joy/Box';
@@ -30,6 +31,13 @@ function App() {
                     setSelectedProject={setSelectedProject}
                     selectedRelease={selectedRelease}
                     setSelectedRelease={setSelectedRelease}
+                  />
+                </Grid>
+                <Grid xs={12}>
+                  <PendingApprovals
+                    startDate={selectedRelease?.startDate}
+                    endDate={selectedRelease?.finishDate}
+                    projectName={selectedProject}
                   />
                 </Grid>
                 <Grid xs={12} md={6}>

@@ -3,6 +3,7 @@ import Table from '@mui/joy/Table';
 import Link from '@mui/joy/Link';
 import CircularProgress from '@mui/joy/CircularProgress';
 import Box from '@mui/joy/Box';
+import Typography from '@mui/joy/Typography';
 import { useNavigate } from "react-router-dom";
 import { API_BASE } from "../api/endpoints";
 
@@ -52,65 +53,70 @@ function PipelinesTable({ project, release }) {
   }
 
   return (
-    <Table
-      aria-label="Pipelines Table"
-      sx={{ minWidth: 650, background: "#fff" }}
-      stickyHeader
-    >
-      <thead>
-        <tr>
-          <th style={{ display: "none" }}>Definition ID</th>
-          <th>Name</th>
-          <th>Last Run Date</th>
-          <th>Description</th>
-          <th>Pipeline Link</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row, idx) => (
-          <tr key={row.releaseId || idx}>
-            <td style={{ display: "none" }}>{row.definitionId}</td>
-            <td style={{
-              whiteSpace: "normal",
-              wordBreak: "break-word"
-            }}>
-              <Link
-                component="button"
-                onClick={() =>
-                  navigate(
-                    `/pipeline-details/${row.definitionId}`,
-                    {
-                      state: {
-                        startDate: release.startDate,
-                        finishDate: release.finishDate,
-                        projectName: project,
-                        definitionId: row.definitionId
-                      }
-                    }
-                  )
-                }
-                underline="none"
-                sx={{ cursor: "pointer" }}
-              >
-                {row.name}
-              </Link>
-            </td>
-            <td>{new Date(row.createdOn).toLocaleString()}</td>
-            <td style={{
-              whiteSpace: "normal",
-              wordBreak: "break-word"
-            }}>
-              {row.description}
-            </td>
-            <td>
-              <Link href={row.pipelineUrl} target="_blank" rel="noopener">
-                Link
-              </Link>
-            </td>
+    <Box>
+      <Typography level="h5" sx={{ mb: 1 }}>
+        Total Pipelines: {rows.length}
+      </Typography>
+      <Table
+        aria-label="Pipelines Table"
+        sx={{ minWidth: 650, background: "#fff" }}
+        stickyHeader
+      >
+        <thead>
+          <tr>
+            <th style={{ display: "none" }}>Definition ID</th>
+            <th>Name</th>
+            <th>Last Run Date</th>
+            <th>Description</th>
+            <th>Pipeline Link</th>
           </tr>
-        ))}
-      </tbody>
-    </Table>
+        </thead>
+        <tbody>
+          {rows.map((row, idx) => (
+            <tr key={row.releaseId || idx}>
+              <td style={{ display: "none" }}>{row.definitionId}</td>
+              <td style={{
+                whiteSpace: "normal",
+                wordBreak: "break-word"
+              }}>
+                <Link
+                  component="button"
+                  onClick={() =>
+                    navigate(
+                      `/pipeline-details/${row.definitionId}`,
+                      {
+                        state: {
+                          startDate: release.startDate,
+                          finishDate: release.finishDate,
+                          projectName: project,
+                          definitionId: row.definitionId
+                        }
+                      }
+                    )
+                  }
+                  underline="none"
+                  sx={{ cursor: "pointer" }}
+                >
+                  {row.name}
+                </Link>
+              </td>
+              <td>{new Date(row.createdOn).toLocaleString()}</td>
+              <td style={{
+                whiteSpace: "normal",
+                wordBreak: "break-word"
+              }}>
+                {row.description}
+              </td>
+              <td>
+                <Link href={row.pipelineUrl} target="_blank" rel="noopener">
+                  Link
+                </Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </Box>
   );
 }
 
