@@ -15,7 +15,7 @@ function PipelineDetails() {
 
   useEffect(() => {
     if (!definitionId || !startDate || !finishDate || !projectName) return;
-    const url = `${API_BASE}/api/pipelines-by-definition?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(finishDate)}&project=${encodeURIComponent(projectName)}&definitionId=${encodeURIComponent(definitionId)}`;
+    const url = `${API_BASE}/api/pipelines-runs?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(finishDate)}&project=${encodeURIComponent(projectName)}&definitionId=${encodeURIComponent(definitionId)}`;
     fetch(url)
       .then(res => res.json())
       .then(data => {
@@ -62,7 +62,7 @@ function PipelineDetails() {
         <tbody>
           {rows.map((row, idx) => (
             <tr key={row.releaseId || idx}>
-              <td>{row.releaseId}</td>
+              <td>{row.name}</td>
               <td>{new Date(row.createdOn).toLocaleString()}</td>
               <td style={{
                 whiteSpace: "normal",

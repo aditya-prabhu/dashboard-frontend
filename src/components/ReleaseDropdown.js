@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import Select from '@mui/joy/Select';
 import Option from '@mui/joy/Option';
 
-// ...existing imports...
 function ReleaseDropdown({ apiUrl, onSelect, value }) {
   const [options, setOptions] = useState([]);
 
