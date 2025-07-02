@@ -29,15 +29,15 @@ function PipelineDetails() {
 
   return (
     <div style={{ position: "relative" }}>
-      {/* Show total releases on top */}
-      <h2 style={{ marginTop: 0, marginBottom: "1rem", color: "#1976d2" }}>
-        Total Releases: {rows.length}
-      </h2>
       {pipelineName && (
-        <h3 style={{ marginBottom: "1rem", wordBreak: "break-word" }}>
+        <h2 style={{ marginTop: 0, marginBottom: "1rem", wordBreak: "break-word" }}>
           <a href={pipelineUrl} target="_blank" rel="noopener noreferrer">{pipelineName}</a>
-        </h3>
+        </h2>
       )}
+      {/* Show total releases below the pipeline name */}
+      <h3 style={{ marginTop: 0, marginBottom: "1rem" }}>
+        Total Releases: {rows.length}
+      </h3>
       {workItemsCard.open && (
         <ReleaseWorkItemsCard
           releaseId={workItemsCard.releaseId}
