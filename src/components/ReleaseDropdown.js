@@ -30,11 +30,23 @@ function ReleaseDropdown({ apiUrl, onSelect, value }) {
       onChange={handleChange}
       sx={{ minWidth: 200 }}
     >
-      {options.map((item, idx) => (
-        <Option key={item.id || idx} value={item.name}>
-          {item.name}
-        </Option>
-      ))}
+      {options.map((item, idx) => {
+        // Format start and finish dates as DD/MM/YY
+        let dateLabel = "";
+        if (item.startDate && item.finishDate) {
+          const start = new Date(item.startDate);
+          const finish = new Date(item.finishDate);
+          const pad = n => n.toString().padStart(2, "0");
+          const startStr = `${pad(start.getDate())}/${pad(start.getMonth() + 1)}/${start.getFullYear().toString().slice(-2)}`;
+          const finishStr = `${pad(finish.getDate())}/${pad(finish.getMonth() + 1)}/${finish.getFullYear().toString().slice(-2)}`;
+          dateLabel = ` (${startStr} - ${finishStr})`;
+        }
+        return (
+          <Option key={item.id || idx} value={item.name}>
+            {item.name}{dateLabel}
+          </Option>
+        );
+      })}
     </Select>
   );
 }
