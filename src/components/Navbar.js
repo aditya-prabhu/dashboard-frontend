@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ProjectDropdown from "./ProjectDropdown";
 import ReleaseDropdown from "./ReleaseDropdown";
 import Box from '@mui/joy/Box';
@@ -12,11 +12,54 @@ function Navbar({
   selectedRelease,
   setSelectedRelease
 }) {
+  const [releasePlanData, setReleasePlanData] = useState([]);
+  const [releasePlanLoading, setReleasePlanLoading] = useState(false);
 
   const releaseNotesUrl = selectedRelease && selectedRelease.ReleaseNotesUrl ? selectedRelease.ReleaseNotesUrl : "";
   const releaseApiUrl = selectedProject
     ? `${API_BASE}/api/iterations?project=${selectedProject}`
     : "";
+
+  // Fetch release plan work items as soon as project or release changes
+  useEffect(() => {
+    const fetchReleasePlan = async () => {
+      if (!selectedProject || !selectedRelease) {
+        setReleasePlanData([]);
+        return;
+      }
+      setReleasePlanLoading(true);
+      try {
+        const url = `${API_BASE}/api/release-plan-work-items?project=${encodeURIComponent(selectedProject)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        setReleasePlanData(Array.isArray(data) ? data : []);
+      } catch {
+        setReleasePlanData([]);
+      }
+      setReleasePlanLoading(false);
+    };
+    fetchReleasePlan();
+  }, [selectedProject, selectedRelease]);
+
+  // Handler for Release Plan button
+  const handleReleasePlanClick = () => {
+    if (!selectedProject || !selectedRelease) return;
+    const sprintName = selectedRelease?.name || "";
+    const match = releasePlanData.find(
+      item =>
+        sprintName &&
+        item.title &&
+        item.title.toLowerCase().includes(sprintName.toLowerCase()) &&
+        item.webUrl
+    );
+    if (match && match.webUrl) {
+      window.open(match.webUrl, "_blank");
+    } else if (releasePlanLoading) {
+      alert("Loading release plan work items, please try again in a moment.");
+    } else {
+      alert("No matching release plan work item found for this sprint.");
+    }
+  };
 
   return (
     <Sheet
@@ -48,7 +91,7 @@ function Navbar({
         />
       </Box>
       {releaseNotesUrl && (
-        <Box>
+        <Box sx={{ display: "flex", gap: 2 }}>
           <Button
             component="a"
             href={releaseNotesUrl}
@@ -58,6 +101,14 @@ function Navbar({
             color="primary"
           >
             Release Notes
+          </Button>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleReleasePlanClick}
+            disabled={releasePlanLoading}
+          >
+            {releasePlanLoading ? "Loading..." : "Release Plan"}
           </Button>
         </Box>
       )}
