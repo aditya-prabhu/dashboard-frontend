@@ -9,6 +9,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell
 import { useLocation, useParams } from "react-router-dom";
 import { API_BASE } from "../api/endpoints";
 import ReleaseWorkItemsCard from "../components/ReleaseWorkItemsCard";
+import Navbar from "../components/Navbar";
 
 const ENV_COLORS = [
   "#4caf50", "#f44336", "#2196f3", "#ff9800", "#9c27b0",
@@ -81,8 +82,34 @@ function PipelineDetails() {
     ),
   }));
 
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Determine the current sprint/iteration name for the navbar
+  const selectedSprintOrIteration =
+    location.state?.sprintName ||
+    location.state?.iterationName ||
+    location.state?.name ||
+    `${startDate} - ${finishDate}`;
+
   return (
     <div style={{ position: "relative" }}>
+      <Navbar
+        selectedProject={projectName}
+        setSelectedProject={() => {}}
+        selectedRelease={{
+          startDate,
+          finishDate,
+          name: selectedSprintOrIteration // Show current sprint/iteration in navbar
+        }}
+        setSelectedRelease={() => {}}
+        showReleaseDropdown={true}
+      />
       {pipelineName && (
         <h2 style={{ marginTop: 0, marginBottom: "1rem", wordBreak: "break-word" }}>
           <a href={pipelineUrl} target="_blank" rel="noopener noreferrer">{pipelineName}</a>
@@ -133,97 +160,93 @@ function PipelineDetails() {
           </BarChart>
         </ResponsiveContainer>
       </Box>
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <>
-          {workItemsCard.open && (
-            <ReleaseWorkItemsCard
-              releaseId={workItemsCard.releaseId}
-              projectName={projectName}
-              onClose={() => setWorkItemsCard({ open: false, releaseId: null })}
-            />
-          )}
-          <Table
-            aria-label="Pipeline Details Table"
-            sx={{ minWidth: 650, background: "#fff" }}
-            stickyHeader
-          >
-            <thead>
-              <tr>
-                <th>Release Name</th>
-                <th>Started On</th>
-                <th>Environments</th>
-                <th>Release Link</th>
-                <th>Associated Work Items</th>
-                <th>Github Commit Link</th>
-              </tr>
-            </thead>
-            <tbody>
-              {combinedRows.map((row, idx) => {
-                const filteredEnvs = envFilter === "All"
-                  ? row.environments
-                  : row.environments.filter(env => env.name === envFilter);
+      <>
+        {workItemsCard.open && (
+          <ReleaseWorkItemsCard
+            releaseId={workItemsCard.releaseId}
+            projectName={projectName}
+            onClose={() => setWorkItemsCard({ open: false, releaseId: null })}
+          />
+        )}
+        <Table
+          aria-label="Pipeline Details Table"
+          sx={{ minWidth: 650, background: "#fff" }}
+          stickyHeader
+        >
+          <thead>
+            <tr>
+              <th>Release Name</th>
+              <th>Started On</th>
+              <th>Environments</th>
+              <th>Release Link</th>
+              <th>Associated Work Items</th>
+              <th>Github Commit Link</th>
+            </tr>
+          </thead>
+          <tbody>
+            {combinedRows.map((row, idx) => {
+              // If "All" is selected, show all environments.
+              // If a filter is selected, show all environments for releases that have the selected environment.
+              const hasSelectedEnv = envFilter === "All"
+                ? true
+                : row.environments.some(env => env.name === envFilter);
 
-                if (filteredEnvs.length === 0) return null;
+              if (!hasSelectedEnv) return null;
 
-                return (
-                  <tr key={row.releaseId || idx}>
-                    <td>{row.releaseName}</td>
-                    <td>{row.queuedOn ? new Date(row.queuedOn).toLocaleString() : ""}</td>
-                    <td>
-                      <Box sx={{ display: 'flex', flexDirection: 'row', gap: 0.5, flexWrap: 'wrap', maxWidth: 400 }}>
-                        {filteredEnvs.map(env => (
-                          <Box
-                            key={env.name}
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              backgroundColor: getEnvColor(env.status),
-                              color: "#fff",
-                              borderRadius: 1,
-                              px: 1,
-                              py: 0.25,
-                              mr: 0.5,
-                              mb: 0.5,
-                              minWidth: 60,
-                              maxWidth: 120,
-                              whiteSpace: 'nowrap',
-                              fontWeight: 500,
-                              fontSize: 12,
-                              justifyContent: 'center'
-                            }}
-                          >
-                            {env.name}
-                          </Box>
-                        ))}
-                      </Box>
-                    </td>
-                    <td>
-                      <a href={row.releaseUrl} target="_blank" rel="noopener noreferrer">Release</a>
-                    </td>
-                    <td>
-                      <Button
-                        variant="outlined"
-                        onClick={() => setWorkItemsCard({ open: true, releaseId: row.releaseId })}
-                      >
-                        View Work Items
-                      </Button>
-                    </td>
-                    <td>
-                      <a href={row.commitUrl} target="_blank" rel="noopener noreferrer">Link</a>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
-        </>
-      )}
+              return (
+                <tr key={row.releaseId || idx}>
+                  <td>{row.releaseName}</td>
+                  <td>{row.queuedOn ? new Date(row.queuedOn).toLocaleString() : ""}</td>
+                  <td>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', gap: 0.5, flexWrap: 'wrap', maxWidth: 400 }}>
+                      {row.environments.map(env => (
+                        <Box
+                          key={env.name}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            backgroundColor: getEnvColor(env.status),
+                            color: "#fff",
+                            borderRadius: 1,
+                            px: 1,
+                            py: 0.25,
+                            mr: 0.5,
+                            mb: 0.5,
+                            minWidth: 60,
+                            maxWidth: 120,
+                            whiteSpace: 'nowrap',
+                            fontWeight: 500,
+                            fontSize: 12,
+                            justifyContent: 'center'
+                          }}
+                        >
+                          {env.name}
+                        </Box>
+                      ))}
+                    </Box>
+                  </td>
+                  <td>
+                    <a href={row.releaseUrl} target="_blank" rel="noopener noreferrer">Release</a>
+                  </td>
+                  <td>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setWorkItemsCard({ open: true, releaseId: row.releaseId })}
+                    >
+                      View Work Items
+                    </Button>
+                  </td>
+                  <td>
+                    <a href={row.commitUrl} target="_blank" rel="noopener noreferrer">Link</a>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+      </>
     </div>
   );
 }
 
-export default PipelineDetails;
+export default PipelineDetails; 
