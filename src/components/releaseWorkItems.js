@@ -1,27 +1,39 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 function ReleaseWorkItems({ releaseId, projectName }) {
   const [workItems, setWorkItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
     const fetchWorkItems = async () => {
       setIsLoading(true);
       setErrorMessage("");
+
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       try {
         const workItemsUrl = `http://localhost:8000/api/release-work-items?releaseId=${encodeURIComponent(
           releaseId
         )}&projectName=${encodeURIComponent(projectName)}`;
-        const workItemsRes = await fetch(workItemsUrl);
+        const workItemsRes = await fetch(workItemsUrl, { signal: controller.signal });
         if (!workItemsRes.ok) throw new Error("Failed to fetch release work items");
 
         const workItemsData = await workItemsRes.json();
         setWorkItems(workItemsData);
       } catch (error) {
-        console.error("Error fetching release work items:", error);
-        setErrorMessage(error.message);
-        setWorkItems([]);
+        if (error.name === "AbortError") {
+          console.log("release work items request aborted");
+        } else {
+          console.error("Error fetching release work items:", error);
+          setErrorMessage(error.message);
+          setWorkItems([]);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -30,6 +42,12 @@ function ReleaseWorkItems({ releaseId, projectName }) {
     if (releaseId && projectName) {
       fetchWorkItems();
     }
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [releaseId, projectName]);
 
   return (

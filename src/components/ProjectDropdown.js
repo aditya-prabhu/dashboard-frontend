@@ -1,14 +1,37 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Select from '@mui/joy/Select';
 import Option from '@mui/joy/Option';
 
 function ProjectDropdown({ apiUrl, onSelect, value }) {
   const [options, setOptions] = useState([]);
+  const fetchControllerRef = useRef(null);
 
   useEffect(() => {
-    fetch(apiUrl)
+    if (!apiUrl) {
+      setOptions([]);
+      return;
+    }
+
+    if (fetchControllerRef.current) {
+      fetchControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    fetchControllerRef.current = controller;
+
+    fetch(apiUrl, { signal: controller.signal })
       .then((res) => res.json())
-      .then((data) => setOptions(data));
+      .then((data) => setOptions(data))
+      .catch((err) => {
+        if (err.name === "AbortError") {
+          console.log("project dropdown request aborted");
+        } else {
+          setOptions([]);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
   }, [apiUrl]);
 
   const handleChange = (event, newValue) => {

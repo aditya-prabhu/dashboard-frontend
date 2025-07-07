@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE } from "../api/endpoints";
 import Box from "@mui/joy/Box";
@@ -21,6 +21,8 @@ function PipelinesTable({ project, release }) {
   const [currentDefId, setCurrentDefId] = useState(null);
   const navigate = useNavigate();
 
+  const fetchControllerRef = useRef(null);
+
   useEffect(() => {
     if (!project || !release) {
       setRows([]);
@@ -31,7 +33,14 @@ function PipelinesTable({ project, release }) {
     const startDate = release.startDate;
     const endDate = release.finishDate;
     const url = `${API_BASE}/api/pipelines?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&project=${encodeURIComponent(project)}`;
-    fetch(url)
+
+    if (fetchControllerRef.current) {
+      fetchControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    fetchControllerRef.current = controller;
+
+    fetch(url, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
         const pipelinesArray = Array.isArray(data) ? data : [data];
@@ -39,7 +48,17 @@ function PipelinesTable({ project, release }) {
         setRows(uniquePipelines);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        if (err.name === "AbortError") {
+          console.log("pipelines request aborted");
+        } else {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
   }, [project, release]);
 
   const filterUniquePipelines = (pipelines) => {
@@ -54,12 +73,23 @@ function PipelinesTable({ project, release }) {
     });
   };
 
+  // Ref for aborting env fetch
+  const envFetchControllerRef = useRef(null);
+
   const handleShowEnvs = (definitionId) => {
     setCurrentDefId(definitionId);
     setEnvLoading(true);
     setOpenModal(true);
     const url = `${API_BASE}/api/deployed-environments?project=${encodeURIComponent(project)}&definitionId=${encodeURIComponent(definitionId)}`;
-    fetch(url)
+
+    // Abort previous env fetch if any
+    if (envFetchControllerRef.current) {
+      envFetchControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    envFetchControllerRef.current = controller;
+
+    fetch(url, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
         const envs = Array.isArray(data.environments) ? data.environments : [];
@@ -70,8 +100,8 @@ function PipelinesTable({ project, release }) {
         setModalEnvs(envs);
         setEnvLoading(false);
       })
-      .catch(() => {
-        setModalEnvs([]);
+      .catch((err) => {
+        if (err.name !== "AbortError") setModalEnvs([]);
         setEnvLoading(false);
       });
   };

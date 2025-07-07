@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Table from '@mui/joy/Table';
 import Link from '@mui/joy/Link';
 import CircularProgress from '@mui/joy/CircularProgress';
@@ -17,6 +17,8 @@ function Workitem({ project, release }) {
   const [assignedToFilter, setAssignedToFilter] = useState('All');
   const [stateFilter, setStateFilter] = useState('All');
 
+  const fetchControllerRef = useRef(null);
+
   useEffect(() => {
     if (!project || !release) {
       setItems([]);
@@ -24,14 +26,31 @@ function Workitem({ project, release }) {
     }
     setLoading(true);
     const url = `${API_BASE}/api/iteration-work-items?project=${encodeURIComponent(project)}&iteration_id=${encodeURIComponent(release.id)}`;
-    fetch(url)
+
+    if (fetchControllerRef.current) {
+      fetchControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    fetchControllerRef.current = controller;
+
+    fetch(url, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
         const WorkitemArray = Array.isArray(data) ? data : [data];
         setItems(WorkitemArray);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        if (err.name === "AbortError") {
+          console.log("work items request aborted");
+        } else {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
   }, [project, release]);
 
   // Count work items by state for pie chart

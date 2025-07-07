@@ -11,16 +11,21 @@ function PendingApprovals({ startDate, endDate, projectName }) {
   const [error, setError] = useState("");
   const cardRef = useRef(null);
 
-  // Fetch pending approvals when inputs change
   useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
     if (!startDate || !endDate || !projectName) {
       setPending([]);
       return;
     }
+
     setLoading(true);
     setError("");
+
     fetch(
-      `http://localhost:8000/api/pending-approvals?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&project=${encodeURIComponent(projectName)}`
+      `http://localhost:8000/api/pending-approvals?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&project=${encodeURIComponent(projectName)}`,
+      { signal }
     )
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch pending approvals");
@@ -28,25 +33,36 @@ function PendingApprovals({ startDate, endDate, projectName }) {
       })
       .then(data => setPending(Array.isArray(data) ? data : []))
       .catch(err => {
-        setError(err.message);
-        setPending([]);
+        if (err.name === 'AbortError') {
+          console.log("pending approval request aborted");
+        } else {
+          setError(err.message);
+          setPending([]);
+        }
       })
       .finally(() => setLoading(false));
+
+    return () => {
+      abortController.abort();
+    };
   }, [startDate, endDate, projectName]);
 
-  // Handle ESC key and click outside to close card
   useEffect(() => {
     if (!showCard) return;
+
     function handleKeyDown(e) {
       if (e.key === "Escape") setShowCard(false);
     }
+    
     function handleClickOutside(e) {
       if (cardRef.current && !cardRef.current.contains(e.target)) {
         setShowCard(false);
       }
     }
+    
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("mousedown", handleClickOutside);
+    
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("mousedown", handleClickOutside);

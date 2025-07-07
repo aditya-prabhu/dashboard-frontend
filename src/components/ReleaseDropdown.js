@@ -1,21 +1,40 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Select from '@mui/joy/Select';
 import Option from '@mui/joy/Option';
 
 function ReleaseDropdown({ apiUrl, onSelect, value }) {
   const [options, setOptions] = useState([]);
+  const fetchControllerRef = useRef(null);
 
   useEffect(() => {
     if (!apiUrl) {
       setOptions([]);
       return;
     }
-    fetch(apiUrl)
+
+    if (fetchControllerRef.current) {
+      fetchControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    fetchControllerRef.current = controller;
+
+    fetch(apiUrl, { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
         const arr = Array.isArray(data) ? data : [data];
         setOptions(arr);
+      })
+      .catch((err) => {
+        if (err.name === "AbortError") {
+          console.log("release dropdown request aborted");
+        } else {
+          setOptions([]);
+        }
       });
+
+    return () => {
+      controller.abort();
+    };
   }, [apiUrl]);
 
   const handleChange = (event, newValue) => {

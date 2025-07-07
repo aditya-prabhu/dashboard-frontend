@@ -10,23 +10,39 @@ function ReleaseWorkItemsCard({ releaseId, projectName, onClose }) {
   const [workItems, setWorkItems] = useState(null);
   const [loading, setLoading] = useState(true);
   const cardRef = useRef(null);
+  const fetchControllerRef = useRef(null);
 
   useEffect(() => {
     if (!releaseId || !projectName) return;
     setLoading(true);
-    fetch(`${API_BASE}/api/release-work-items?release_id=${encodeURIComponent(releaseId)}&project=${encodeURIComponent(projectName)}`)
+
+    if (fetchControllerRef.current) {
+      fetchControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    fetchControllerRef.current = controller;
+
+    fetch(`${API_BASE}/api/release-work-items?release_id=${encodeURIComponent(releaseId)}&project=${encodeURIComponent(projectName)}`, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
         setWorkItems(Array.isArray(data) ? data : []);
         setLoading(false);
       })
-      .catch(() => {
-        setWorkItems([]);
-        setLoading(false);
+      .catch((err) => {
+        if (err.name === "AbortError") {
+          console.log("release work items card request aborted");
+        } else {
+          setWorkItems([]);
+          setLoading(false);
+        }
       });
+
+    // Cleanup: abort fetch if dependencies change or component unmounts
+    return () => {
+      controller.abort();
+    };
   }, [releaseId, projectName]);
 
-  // Handle ESC key and click outside
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === "Escape") {
