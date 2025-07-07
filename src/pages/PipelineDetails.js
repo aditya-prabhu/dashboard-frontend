@@ -65,7 +65,7 @@ function PipelineDetails() {
   const getEnvColor = (status) => {
     if (status === "succeeded") return "#4caf50";
     if (status === "failed") return "#f44336";
-    return "#2196f3";
+    return "#ffff00";
   };
 
   // Get all unique environment names for filter options

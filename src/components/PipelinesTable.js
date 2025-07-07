@@ -156,6 +156,7 @@ function PipelinesTable({ project, release }) {
         <ModalDialog>
           <ModalClose />
           <Typography level="h6" sx={{ mb: 1 }}>Deployed Environments</Typography>
+        
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1, minHeight: 40 }}>
             {envLoading ? (
               <Box sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -164,18 +165,31 @@ function PipelinesTable({ project, release }) {
             ) : modalEnvs.length === 0 ? (
               <span style={{ color: "#888" }}>No Environments</span>
             ) : (
-              modalEnvs.map((env, i) => (
-                <Button
-                  key={env.environmentName + i}
-                  size="sm"
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => window.open(env.releaseUrl, "_blank")}
-                  sx={{ textTransform: "none", minWidth: 80 }}
-                >
-                  {env.environmentName}
-                </Button>
-              ))
+              modalEnvs.map((env, i) => {
+                // List of main environments
+                const mainEnvs = ['dev', 'int', 'uat', 'prod'];
+                // Check if environment is not one of the main ones (case-insensitive)
+                const isOtherEnv = !mainEnvs.includes(env.environmentName?.toLowerCase());
+                return (
+                  <Button
+                    key={env.environmentName + i}
+                    size="sm"
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => window.open(env.releaseUrl, "_blank")}
+                    sx={{
+                      textTransform: "none",
+                      minWidth: 80,
+                      backgroundColor: isOtherEnv ? "#ffe6f0" : undefined, // light pink for others
+                      color: isOtherEnv ? "#b71c5a" : undefined,
+                      borderColor: isOtherEnv ? "#f8bbd0" : undefined,
+                      '&:hover': isOtherEnv ? { backgroundColor: "#ffd6ea" } : {}
+                    }}
+                  >
+                    {env.environmentName}
+                  </Button>
+                );
+              })
             )}
           </Box>
         </ModalDialog>

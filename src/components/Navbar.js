@@ -41,25 +41,18 @@ function Navbar({
     fetchReleasePlan();
   }, [selectedProject, selectedRelease]);
 
-  // Handler for Release Plan button
-  const handleReleasePlanClick = () => {
-    if (!selectedProject || !selectedRelease) return;
+  // Find matching release plan item
+  let releasePlanMatch = null;
+  if (selectedProject && selectedRelease && releasePlanData.length > 0) {
     const sprintName = selectedRelease?.name || "";
-    const match = releasePlanData.find(
+    releasePlanMatch = releasePlanData.find(
       item =>
         sprintName &&
         item.title &&
         item.title.toLowerCase().includes(sprintName.toLowerCase()) &&
         item.webUrl
     );
-    if (match && match.webUrl) {
-      window.open(match.webUrl, "_blank");
-    } else if (releasePlanLoading) {
-      alert("Loading release plan work items, please try again in a moment.");
-    } else {
-      alert("No matching release plan work item found for this sprint.");
-    }
-  };
+  }
 
   return (
     <Sheet
@@ -102,14 +95,24 @@ function Navbar({
           >
             Release Notes
           </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={handleReleasePlanClick}
-            disabled={releasePlanLoading}
-          >
-            {releasePlanLoading ? "Loading..." : "Release Plan"}
-          </Button>
+          {/* Show Release Plan button or "No Release Plan Found" */}
+          {releasePlanLoading ? (
+            <Button variant="outlined" color="primary" disabled>
+              Loading...
+            </Button>
+          ) : releasePlanMatch && releasePlanMatch.webUrl ? (
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => window.open(releasePlanMatch.webUrl, "_blank")}
+            >
+              Release Plan
+            </Button>
+          ) : (
+            <Box sx={{ display: "flex", alignItems: "center", color: "#b71c1c", fontWeight: 500, px: 2 }}>
+              No Release Plan Found
+            </Box>
+          )}
         </Box>
       )}
     </Sheet>
