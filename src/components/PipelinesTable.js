@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
-import Table from '@mui/joy/Table';
-import Link from '@mui/joy/Link';
-import Button from '@mui/joy/Button';
-import CircularProgress from '@mui/joy/CircularProgress';
-import Box from '@mui/joy/Box';
-import Typography from '@mui/joy/Typography';
-import Modal from '@mui/joy/Modal';
-import ModalDialog from '@mui/joy/ModalDialog';
-import ModalClose from '@mui/joy/ModalClose';
 import { useNavigate } from "react-router-dom";
 import { API_BASE } from "../api/endpoints";
+import Box from "@mui/joy/Box";
+import Typography from "@mui/joy/Typography";
+import Table from "@mui/joy/Table";
+import Link from "@mui/joy/Link";
+import Button from "@mui/joy/Button";
+import Modal from "@mui/joy/Modal";
+import ModalDialog from "@mui/joy/ModalDialog";
+import ModalClose from "@mui/joy/ModalClose";
+import CircularProgress from "@mui/joy/CircularProgress";
 
 function PipelinesTable({ project, release }) {
   const [rows, setRows] = useState([]);
@@ -17,6 +17,8 @@ function PipelinesTable({ project, release }) {
   const [envMap, setEnvMap] = useState({});
   const [openModal, setOpenModal] = useState(false);
   const [modalEnvs, setModalEnvs] = useState([]);
+  const [envLoading, setEnvLoading] = useState(false);
+  const [currentDefId, setCurrentDefId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,28 +37,10 @@ function PipelinesTable({ project, release }) {
         const pipelinesArray = Array.isArray(data) ? data : [data];
         const uniquePipelines = filterUniquePipelines(pipelinesArray);
         setRows(uniquePipelines);
-        uniquePipelines.forEach(pipeline => {
-          fetchEnvironments(project, pipeline.definitionId);
-        });
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, [project, release]);
-
-  // Fetch deployed environments for a pipeline
-  const fetchEnvironments = (projectName, definitionId) => {
-    const url = `${API_BASE}/api/deployed-environments?project=${encodeURIComponent(projectName)}&definitionId=${encodeURIComponent(definitionId)}`;
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        // The response is { environments: [...], pipelineUrl: ... }
-        const envs = Array.isArray(data.environments) ? data.environments : [];
-        setEnvMap(prev => ({
-          ...prev,
-          [definitionId]: envs
-        }));
-      });
-  };
 
   const filterUniquePipelines = (pipelines) => {
     const seen = new Set();
@@ -71,8 +55,25 @@ function PipelinesTable({ project, release }) {
   };
 
   const handleShowEnvs = (definitionId) => {
-    setModalEnvs(envMap[definitionId] || []);
+    setCurrentDefId(definitionId);
+    setEnvLoading(true);
     setOpenModal(true);
+    const url = `${API_BASE}/api/deployed-environments?project=${encodeURIComponent(project)}&definitionId=${encodeURIComponent(definitionId)}`;
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        const envs = Array.isArray(data.environments) ? data.environments : [];
+        setEnvMap(prev => ({
+          ...prev,
+          [definitionId]: envs
+        }));
+        setModalEnvs(envs);
+        setEnvLoading(false);
+      })
+      .catch(() => {
+        setModalEnvs([]);
+        setEnvLoading(false);
+      });
   };
 
   if (loading) {
@@ -155,22 +156,27 @@ function PipelinesTable({ project, release }) {
         <ModalDialog>
           <ModalClose />
           <Typography level="h6" sx={{ mb: 1 }}>Deployed Environments</Typography>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
-            {modalEnvs.length === 0
-              ? <span style={{ color: "#888" }}>No Environments</span>
-              : modalEnvs.map((env, i) => (
-                  <Button
-                    key={env.environmentName + i}
-                    size="sm"
-                    variant="outlined"
-                    color="primary"
-                    onClick={() => window.open(env.releaseUrl, "_blank")}
-                    sx={{ textTransform: "none", minWidth: 80 }}
-                  >
-                    {env.environmentName}
-                  </Button>
-                ))
-            }
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1, minHeight: 40 }}>
+            {envLoading ? (
+              <Box sx={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                <CircularProgress />
+              </Box>
+            ) : modalEnvs.length === 0 ? (
+              <span style={{ color: "#888" }}>No Environments</span>
+            ) : (
+              modalEnvs.map((env, i) => (
+                <Button
+                  key={env.environmentName + i}
+                  size="sm"
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => window.open(env.releaseUrl, "_blank")}
+                  sx={{ textTransform: "none", minWidth: 80 }}
+                >
+                  {env.environmentName}
+                </Button>
+              ))
+            )}
           </Box>
         </ModalDialog>
       </Modal>
