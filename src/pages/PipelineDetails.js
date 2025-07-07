@@ -9,7 +9,6 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell
 import { useLocation, useParams } from "react-router-dom";
 import { API_BASE } from "../api/endpoints";
 import ReleaseWorkItemsCard from "../components/ReleaseWorkItemsCard";
-import Navbar from "../components/Navbar";
 
 const ENV_COLORS = [
   "#4caf50", "#f44336", "#2196f3", "#ff9800", "#9c27b0",
@@ -19,7 +18,17 @@ const ENV_COLORS = [
 function PipelineDetails() {
   const { definitionId } = useParams();
   const location = useLocation();
-  const { startDate, finishDate, projectName } = location.state || {};
+
+  // Get project and release from navigation state
+  const projectName = location.state?.selectedProject || location.state?.projectName || "";
+  const selectedRelease = location.state?.selectedRelease || {
+    startDate: location.state?.startDate,
+    finishDate: location.state?.finishDate,
+    name: location.state?.name || location.state?.sprintName || location.state?.iterationName || ""
+  };
+  const startDate = selectedRelease.startDate;
+  const finishDate = selectedRelease.finishDate;
+
   const [rows, setRows] = useState([]);
   const [workItemsCard, setWorkItemsCard] = useState({ open: false, releaseId: null });
   const [loading, setLoading] = useState(false);
@@ -90,26 +99,23 @@ function PipelineDetails() {
     );
   }
 
-  // Determine the current sprint/iteration name for the navbar
+  // Determine the current sprint/iteration name for display
   const selectedSprintOrIteration =
-    location.state?.sprintName ||
-    location.state?.iterationName ||
-    location.state?.name ||
-    `${startDate} - ${finishDate}`;
+    selectedRelease?.name ||
+    selectedRelease?.sprintName ||
+    selectedRelease?.iterationName ||
+    "";
 
   return (
     <div style={{ position: "relative" }}>
-      <Navbar
-        selectedProject={projectName}
-        setSelectedProject={() => {}}
-        selectedRelease={{
-          startDate,
-          finishDate,
-          name: selectedSprintOrIteration // Show current sprint/iteration in navbar
-        }}
-        setSelectedRelease={() => {}}
-        showReleaseDropdown={true}
-      />
+      {/* Show only the selected release as text */}
+      <Box sx={{ mb: 2, display: 'flex', gap: 4, alignItems: 'center', justifyContent: 'center' }}>
+        {selectedSprintOrIteration && (
+          <Typography level="h5" sx={{ color: "#1976d2" }}>
+            Release: {selectedSprintOrIteration}
+          </Typography>
+        )}
+      </Box>
       {pipelineName && (
         <h2 style={{ marginTop: 0, marginBottom: "1rem", wordBreak: "break-word" }}>
           <a href={pipelineUrl} target="_blank" rel="noopener noreferrer">{pipelineName}</a>
@@ -249,4 +255,4 @@ function PipelineDetails() {
   );
 }
 
-export default PipelineDetails; 
+export default PipelineDetails;
