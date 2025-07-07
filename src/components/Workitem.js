@@ -6,10 +6,7 @@ import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
 import Select from '@mui/joy/Select';
 import Option from '@mui/joy/Option';
-import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
 import { API_BASE } from "../api/endpoints";
-
-const COLORS = ['#8884d8', '#82ca9d', '#ff8042'];
 
 function Workitem({ project, release }) {
   const [items, setItems] = useState([]);
@@ -53,18 +50,6 @@ function Workitem({ project, release }) {
     };
   }, [project, release]);
 
-  // Count work items by state for pie chart
-  const stateCounts = items.reduce(
-    (acc, item) => {
-      const state = (item.state || '').toLowerCase();
-      if (state) acc[state] = (acc[state] || 0) + 1;
-      return acc;
-    },
-    {}
-  );
-
-  const pieData = Object.entries(stateCounts).map(([name, value]) => ({ name, value }));
-
   // Get unique assignedTo and state values for dropdowns
   const assignedToOptions = Array.from(new Set(items.map(item => item.assignedTo).filter(Boolean)));
   const stateOptions = Array.from(new Set(items.map(item => item.state).filter(Boolean)));
@@ -85,33 +70,6 @@ function Workitem({ project, release }) {
 
   return (
     <Box>
-      {/* Pie Chart for work item states */}
-      <Box sx={{ width: '100%', maxWidth: 400, height: 250, mx: "auto", my: 3, background: "#fff", borderRadius: 2, boxShadow: 1, p: 2 }}>
-        <Typography level="h6" sx={{ mb: 2 }}>Work Item State Distribution</Typography>
-        {pieData.length === 0 ? (
-          <Box sx={{ textAlign: "center", color: "#888", mt: 6 }}>No work item data</Box>
-        ) : (
-          <ResponsiveContainer>
-            <PieChart>
-              <Pie
-                data={pieData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                label
-              >
-                {pieData.map((entry, idx) => (
-                  <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        )}
-      </Box>
       <Typography level="h5" sx={{ mb: 1 }}>
         Total Work Items: {filteredItems.length}
       </Typography>
