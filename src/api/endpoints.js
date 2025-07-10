@@ -1,3 +1,3 @@
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:8000";
+const API_BASE = "https://func-dashboardbe-cveffbf7d9fpbcex.westus3-01.azurewebsites.net";
 
 export { API_BASE };
