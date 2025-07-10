@@ -14,11 +14,9 @@ import CircularProgress from "@mui/joy/CircularProgress";
 function PipelinesTable({ project, release }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [envMap, setEnvMap] = useState({});
   const [openModal, setOpenModal] = useState(false);
   const [modalEnvs, setModalEnvs] = useState([]);
   const [envLoading, setEnvLoading] = useState(false);
-  const [currentDefId, setCurrentDefId] = useState(null);
   const navigate = useNavigate();
 
   const fetchControllerRef = useRef(null);
@@ -26,7 +24,6 @@ function PipelinesTable({ project, release }) {
   useEffect(() => {
     if (!project || !release) {
       setRows([]);
-      setEnvMap({});
       return;
     }
     setLoading(true);
@@ -77,7 +74,6 @@ function PipelinesTable({ project, release }) {
   const envFetchControllerRef = useRef(null);
 
   const handleShowEnvs = (definitionId) => {
-    setCurrentDefId(definitionId);
     setEnvLoading(true);
     setOpenModal(true);
     const url = `${API_BASE}/api/deployed-environments?project=${encodeURIComponent(project)}&definitionId=${encodeURIComponent(definitionId)}`;
@@ -93,10 +89,6 @@ function PipelinesTable({ project, release }) {
       .then(res => res.json())
       .then(data => {
         const envs = Array.isArray(data.environments) ? data.environments : [];
-        setEnvMap(prev => ({
-          ...prev,
-          [definitionId]: envs
-        }));
         setModalEnvs(envs);
         setEnvLoading(false);
       })
