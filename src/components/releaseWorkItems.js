@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { API_BASE } from "../api/endpoints";
 
 function ReleaseWorkItems({ releaseId, projectName }) {
   const [workItems, setWorkItems] = useState([]);
@@ -18,7 +19,7 @@ function ReleaseWorkItems({ releaseId, projectName }) {
       abortControllerRef.current = controller;
 
       try {
-        const workItemsUrl = `http://localhost:8000/api/release-work-items?releaseId=${encodeURIComponent(
+        const workItemsUrl = `${API_BASE}/api/release-work-items?releaseId=${encodeURIComponent(
           releaseId
         )}&projectName=${encodeURIComponent(projectName)}`;
         const workItemsRes = await fetch(workItemsUrl, { signal: controller.signal });

@@ -3,6 +3,7 @@ import Card from '@mui/joy/Card';
 import Typography from '@mui/joy/Typography';
 import Box from '@mui/joy/Box';
 import Button from '@mui/joy/Button';
+import { API_BASE } from "../api/endpoints";
 
 function PendingApprovals({ startDate, endDate, projectName }) {
   const [pending, setPending] = useState([]);
@@ -24,7 +25,7 @@ function PendingApprovals({ startDate, endDate, projectName }) {
     setError("");
 
     fetch(
-      `http://localhost:8000/api/pending-approvals?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&project=${encodeURIComponent(projectName)}`,
+      `${API_BASE}/api/pending-approvals?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&project=${encodeURIComponent(projectName)}`,
       { signal }
     )
       .then(res => {
