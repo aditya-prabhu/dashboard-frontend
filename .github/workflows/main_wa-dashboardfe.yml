@@ -66,6 +66,6 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'wa-dashboardFE'
-          slot-name: 'Production'
+          publish-profile: $
           package: .
           
