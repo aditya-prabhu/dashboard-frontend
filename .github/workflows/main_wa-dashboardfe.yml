@@ -26,7 +26,7 @@ jobs:
       - name: npm install, build, and test
         run: |
           npm install
-          npm start
+          npm run build
 
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
