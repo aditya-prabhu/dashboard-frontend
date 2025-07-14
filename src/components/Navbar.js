@@ -5,6 +5,8 @@ import Box from '@mui/joy/Box';
 import Sheet from '@mui/joy/Sheet';
 import Button from '@mui/joy/Button';
 import { API_BASE } from "../api/endpoints";
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
+import NotificationBell from "./NotificationBell";
 
 function Navbar({
   selectedProject,
@@ -12,6 +14,8 @@ function Navbar({
   selectedRelease,
   setSelectedRelease
 }) {
+  const { instance } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
   const [releasePlanData, setReleasePlanData] = useState([]);
   const [releasePlanLoading, setReleasePlanLoading] = useState(false);
 
@@ -115,6 +119,21 @@ function Navbar({
           )}
         </Box>
       )}
+      {/* Notification Bell */}
+      {isAuthenticated && selectedProject && (
+        <NotificationBell projectName={selectedProject} />
+      )}
+      <nav>
+        {isAuthenticated ? (
+          <Button onClick={() => instance.logoutRedirect()} variant="outlined" color="secondary">
+            Sign Out
+          </Button>
+        ) : (
+          <Button onClick={() => instance.loginRedirect()} variant="outlined" color="primary">
+            Sign In
+          </Button>
+        )}
+      </nav>
     </Sheet>
   );
 }

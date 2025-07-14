@@ -2,8 +2,8 @@ import { LogLevel } from '@azure/msal-browser';
 
 export const msalConfig = {
     auth: {
-        clientId: '7cda28e2-7344-4d0d-a51e-5341c06c9375', 
-        authority: 'https://login.microsoftonline.com/34144108-41fd-42b4-87ca-a71a3e955387/', 
+        clientId: 'b9e8a5c9-1a29-491c-98b4-e00e4669de78', 
+        authority: 'https://login.microsoftonline.com/2e319086-9a26-46a3-865f-615bed576786', 
         redirectUri: '/', 
         postLogoutRedirectUri: '/', 
         navigateToLoginRequestUrl: false, 
@@ -39,7 +39,9 @@ export const msalConfig = {
     },
 };
 
+// Add your scopeUri here (replace with your actual scope URI)
+const scopeUri = "api://b9e8a5c9-1a29-491c-98b4-e00e4669de78/beeline";
 
 export const loginRequest = {
-    scopes: [],
+    scopes: [scopeUri],
 };
