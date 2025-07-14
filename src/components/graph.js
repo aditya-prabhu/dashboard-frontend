@@ -26,6 +26,8 @@ const TEST_PLAN_COLORS = [
   "#1976d2"  // Blocked/Failed - blue
 ];
 
+// ...existing imports...
+
 function Graph({ project, release }) {
   // Work Item State Pie Chart
   const [workItems, setWorkItems] = useState([]);
@@ -46,10 +48,14 @@ function Graph({ project, release }) {
       `${API_BASE}/api/iteration-work-items?project=${encodeURIComponent(project)}&iteration_id=${encodeURIComponent(release.id)}`
     )
       .then((res) => res.json())
-      .then((data) => setWorkItems(Array.isArray(data) ? data : [data]))
+      .then((data) => {
+        setWorkItems(data.value);
+      })
       .catch(() => setWorkItems([]))
       .finally(() => setLoadingWorkItems(false));
   }, [project, release]);
+
+// ...rest of the file remains unchanged...
 
   // Fetch test plan results
   useEffect(() => {
