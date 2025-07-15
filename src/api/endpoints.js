@@ -1,3 +1,3 @@
-const API_BASE = "https://fa-dashbordbe-b5a7f8akbzanhjcp.westus3-01.azurewebsites.net";
+const API_BASE = "http://127.0.0.1:8000";
 
 export { API_BASE };

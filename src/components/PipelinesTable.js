@@ -76,7 +76,14 @@ function PipelinesTable({ project, release }) {
   const handleShowEnvs = (definitionId) => {
     setEnvLoading(true);
     setOpenModal(true);
-    const url = `${API_BASE}/api/deployed-environments?project=${encodeURIComponent(project)}&definitionId=${encodeURIComponent(definitionId)}`;
+
+    // Prepare parameters for pipelines-runs API
+    const startDate = release.startDate;
+    const endDate = release.finishDate;
+    const projectName = project;
+
+    // Use pipelines-runs API to fetch only the latest release environments
+    const url = `${API_BASE}/api/pipelines-runs?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&project=${encodeURIComponent(projectName)}&definitionId=${encodeURIComponent(definitionId)}`;
 
     // Abort previous env fetch if any
     if (envFetchControllerRef.current) {
@@ -88,7 +95,14 @@ function PipelinesTable({ project, release }) {
     fetch(url, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
-        const envs = Array.isArray(data.environments) ? data.environments : [];
+        // data is an array of environment objects for all releases in the range
+        let envs = [];
+        if (Array.isArray(data) && data.length > 0) {
+          // Find the latest releaseId
+          const latestReleaseId = Math.max(...data.map(env => env.releaseId));
+          // Filter environments for the latest release only
+          envs = data.filter(env => env.releaseId === latestReleaseId);
+        }
         setModalEnvs(envs);
         setEnvLoading(false);
       })
@@ -187,31 +201,61 @@ function PipelinesTable({ project, release }) {
             ) : modalEnvs.length === 0 ? (
               <span style={{ color: "#888" }}>No Environments</span>
             ) : (
-              modalEnvs.map((env, i) => {
-                // List of main environments
-                const mainEnvs = ['dev', 'int', 'uat', 'prod'];
-                // Check if environment is not one of the main ones (case-insensitive)
-                const isOtherEnv = !mainEnvs.includes(env.environmentName?.toLowerCase());
-                return (
-                  <Button
-                    key={env.environmentName + i}
-                    size="sm"
-                    variant="outlined"
-                    color="primary"
-                    onClick={() => window.open(env.releaseUrl, "_blank")}
-                    sx={{
-                      textTransform: "none",
-                      minWidth: 80,
-                      backgroundColor: isOtherEnv ? "#ffe6f0" : undefined, // light pink for others
-                      color: isOtherEnv ? "#b71c5a" : undefined,
-                      borderColor: isOtherEnv ? "#f8bbd0" : undefined,
-                      '&:hover': isOtherEnv ? { backgroundColor: "#ffd6ea" } : {}
-                    }}
-                  >
-                    {env.environmentName}
-                  </Button>
-                );
-              })
+              // Show all environments of the topmost (latest) release only
+              (() => {
+                const latestReleaseId = Math.max(...modalEnvs.map(env => env.releaseId));
+                const latestReleaseEnvs = modalEnvs.filter(env => env.releaseId === latestReleaseId);
+                return latestReleaseEnvs.map((env, i) => {
+                  // Color based on status
+                  let colorProps = {};
+                  const status = env.status?.toLowerCase();
+                  if (status === "succeeded" || status === "success") {
+                    colorProps = {
+                      backgroundColor: "#e8f5e9",
+                      color: "#388e3c",
+                      borderColor: "#a5d6a7",
+                      '&:hover': { backgroundColor: "#c8e6c9" }
+                    };
+                  } else if (status === "failed" || status === "failure") {
+                    colorProps = {
+                      backgroundColor: "#ffebee",
+                      color: "#c62828",
+                      borderColor: "#ef9a9a",
+                      '&:hover': { backgroundColor: "#ffcdd2" }
+                    };
+                  } else if (status === "pending" || status === "inprogress") {
+                    colorProps = {
+                      backgroundColor: "#fffde7",
+                      color: "#f9a825",
+                      borderColor: "#ffe082",
+                      '&:hover': { backgroundColor: "#fff9c4" }
+                    };
+                  } else {
+                    colorProps = {
+                      backgroundColor: "#eceff1",
+                      color: "#607d8b",
+                      borderColor: "#b0bec5",
+                      '&:hover': { backgroundColor: "#cfd8dc" }
+                    };
+                  }
+                  return (
+                    <Button
+                      key={env.environment + i}
+                      size="sm"
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => window.open(env.releaseUrl, "_blank")}
+                      sx={{
+                        textTransform: "none",
+                        minWidth: 80,
+                        ...colorProps
+                      }}
+                    >
+                      {env.environment} {env.status ? `(${env.status})` : ""}
+                    </Button>
+                  );
+                });
+              })()
             )}
           </Box>
         </ModalDialog>

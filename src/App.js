@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import PipelinesTable from './components/PipelinesTable';
 import Workitem from './components/Workitem';
@@ -14,96 +14,90 @@ import Box from '@mui/joy/Box';
 function App() {
   const [selectedProject, setSelectedProject] = useState('');
   const [selectedRelease, setSelectedRelease] = useState(null);
-
   const showContent = selectedProject && selectedRelease;
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/create-project" element={<CreateProjectForm />} />
-        <Route
-          path="/"
-          element={
-            <>
-              {/* Editable Navbar for main dashboard */}
-              <Navbar
-                selectedProject={selectedProject}
-                setSelectedProject={setSelectedProject}
-                selectedRelease={selectedRelease}
-                setSelectedRelease={setSelectedRelease}
-                readOnly={false}
-              />
-              <Grid container spacing={2} sx={{ minHeight: '100vh', p: 2 }}>
-                {showContent ? (
-                  <>
-                    <Grid xs={12}>
-                      <PendingApprovals
-                        startDate={selectedRelease?.startDate}
-                        endDate={selectedRelease?.finishDate}
-                        projectName={selectedProject}
-                      />
-                    </Grid>
-                    {/* Pie chart just below PendingApprovals */}
-                    <Grid xs={12}>
-                      <Graph project={selectedProject} release={selectedRelease} />
-                    </Grid>
-                    <Grid xs={12} md={6}>
-                      <Box sx={{ p: 2, background: '#fafafa', borderRadius: 2, height: '70vh', overflow: 'auto' }}>
-                        <h2>Pipelines</h2>
-                        <PipelinesTable project={selectedProject} release={selectedRelease} />
-                      </Box>
-                    </Grid>
-                    <Grid xs={12} md={6}>
-                      <Box sx={{ p: 2, background: '#fafafa', borderRadius: 2, height: '70vh', overflow: 'auto' }}>
-                        <h2>Work Items</h2>
-                        <Workitem project={selectedProject} release={selectedRelease} />
-                      </Box>
-                    </Grid>
-                  </>
-                ) : (
+    <Routes>
+      <Route path="/create-project" element={<CreateProjectForm />} />
+      <Route
+        path="/"
+        element={
+          <>
+            <Navbar
+              selectedProject={selectedProject}
+              setSelectedProject={setSelectedProject}
+              selectedRelease={selectedRelease}
+              setSelectedRelease={setSelectedRelease}
+              readOnly={false}
+            />
+            <Grid container spacing={2} sx={{ minHeight: '100vh', p: 2 }}>
+              {showContent ? (
+                <>
                   <Grid xs={12}>
-                    <Box
-                      sx={{
-                        minHeight: '60vh',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: '#fafafa'
-                      }}
-                    >
-                      <span>
-                        {selectedProject
-                          ? "Please select a release to view dashboard details."
-                          : "Please select a project and release to begin."}
-                      </span>
+                    <PendingApprovals
+                      startDate={selectedRelease?.startDate}
+                      endDate={selectedRelease?.finishDate}
+                      projectName={selectedProject}
+                    />
+                  </Grid>
+                  <Grid xs={12}>
+                    <Graph project={selectedProject} release={selectedRelease} />
+                  </Grid>
+                  <Grid xs={12} md={6}>
+                    <Box sx={{ p: 2, background: '#fafafa', borderRadius: 2, height: '70vh', overflow: 'auto' }}>
+                      <h2>Pipelines</h2>
+                      <PipelinesTable project={selectedProject} release={selectedRelease} />
                     </Box>
                   </Grid>
-                )}
-              </Grid>
-            </>
-          }
-        />
-        <Route
-          path="/pipeline-details/:definitionId"
-          element={
-            <>
-              {/* Read-only Navbar for pipeline details */}
-              <Navbar
-                selectedProject={selectedProject}
-                selectedRelease={selectedRelease}
-                readOnly={true}
-              />
-              <PipelineDetails
-                selectedProject={selectedProject}
-                setSelectedProject={setSelectedProject}
-                selectedRelease={selectedRelease}
-                setSelectedRelease={setSelectedRelease}
-              />
-            </>
-          }
-        />
-      </Routes>
-    </Router>
+                  <Grid xs={12} md={6}>
+                    <Box sx={{ p: 2, background: '#fafafa', borderRadius: 2, height: '70vh', overflow: 'auto' }}>
+                      <h2>Work Items</h2>
+                      <Workitem project={selectedProject} release={selectedRelease} />
+                    </Box>
+                  </Grid>
+                </>
+              ) : (
+                <Grid xs={12}>
+                  <Box
+                    sx={{
+                      minHeight: '60vh',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: '#fafafa'
+                    }}
+                  >
+                    <span>
+                      {selectedProject
+                        ? "Please select a release to view dashboard details."
+                        : "Please select a project and release to begin."}
+                    </span>
+                  </Box>
+                </Grid>
+              )}
+            </Grid>
+          </>
+        }
+      />
+      <Route
+        path="/pipeline-details/:definitionId"
+        element={
+          <>
+            <Navbar
+              selectedProject={selectedProject}
+              selectedRelease={selectedRelease}
+              readOnly={true}
+            />
+            <PipelineDetails
+              selectedProject={selectedProject}
+              setSelectedProject={setSelectedProject}
+              selectedRelease={selectedRelease}
+              setSelectedRelease={setSelectedRelease}
+            />
+          </>
+        }
+      />
+    </Routes>
   );
 }
 
