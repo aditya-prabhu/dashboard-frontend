@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ProjectDropdown from "./ProjectDropdown";
 import ReleaseDropdown from "./ReleaseDropdown";
 import Box from '@mui/joy/Box';
@@ -18,13 +18,13 @@ function Navbar({
   const isAuthenticated = useIsAuthenticated();
   const [releasePlanData, setReleasePlanData] = useState([]);
   const [releasePlanLoading, setReleasePlanLoading] = useState(false);
+  const fetchControllerRef = useRef(null);
 
   const releaseNotesUrl = selectedRelease && selectedRelease.ReleaseNotesUrl ? selectedRelease.ReleaseNotesUrl : "";
   const releaseApiUrl = selectedProject
     ? `${API_BASE}/api/iterations?project=${selectedProject}`
     : "";
 
-  // Fetch release plan work items as soon as project or release changes
   useEffect(() => {
     const fetchReleasePlan = async () => {
       if (!selectedProject || !selectedRelease) {
@@ -32,20 +32,36 @@ function Navbar({
         return;
       }
       setReleasePlanLoading(true);
+
+      if (fetchControllerRef.current) {
+        fetchControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      fetchControllerRef.current = controller;
+
       try {
         const url = `${API_BASE}/api/release-plan-work-items?project=${encodeURIComponent(selectedProject)}`;
-        const res = await fetch(url);
+        const res = await fetch(url, { signal: controller.signal });
         const data = await res.json();
         setReleasePlanData(Array.isArray(data) ? data : []);
-      } catch {
-        setReleasePlanData([]);
+      } catch (err) {
+        if (err.name === "AbortError") {
+          console.log("release plan request aborted");
+        } else {
+          setReleasePlanData([]);
+        }
       }
       setReleasePlanLoading(false);
     };
     fetchReleasePlan();
+
+    return () => {
+      if (fetchControllerRef.current) {
+        fetchControllerRef.current.abort();
+      }
+    };
   }, [selectedProject, selectedRelease]);
 
-  // Find matching release plan item
   let releasePlanMatch = null;
   if (selectedProject && selectedRelease && releasePlanData.length > 0) {
     const sprintName = selectedRelease?.name || "";
@@ -99,7 +115,6 @@ function Navbar({
           >
             Release Notes
           </Button>
-          {/* Show Release Plan button or "No Release Plan Found" */}
           {releasePlanLoading ? (
             <Button variant="outlined" color="primary" disabled>
               Loading...

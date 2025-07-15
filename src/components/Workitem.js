@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import Table from '@mui/joy/Table';
 import Link from '@mui/joy/Link';
 import CircularProgress from '@mui/joy/CircularProgress';
@@ -33,8 +33,9 @@ function Workitem({ project, release }) {
     fetch(url, { signal: controller.signal })
       .then(res => res.json())
       .then(data => {
-        const WorkitemArray = Array.isArray(data) ? data : [data];
-        setItems(WorkitemArray);
+        let workItems = [];
+        workItems = data.value;
+        setItems(workItems);
         setLoading(false);
       })
       .catch((err) => {
@@ -50,14 +51,22 @@ function Workitem({ project, release }) {
     };
   }, [project, release]);
 
-  // Get unique assignedTo and state values for dropdowns
-  const assignedToOptions = Array.from(new Set(items.map(item => item.assignedTo).filter(Boolean)));
-  const stateOptions = Array.from(new Set(items.map(item => item.state).filter(Boolean)));
-
-  // Filter items based on dropdowns
-  const filteredItems = items.filter(item =>
-    (assignedToFilter === 'All' || item.assignedTo === assignedToFilter) &&
-    (stateFilter === 'All' || item.state === stateFilter)
+  // Memoize dropdown options and filtered items for performance
+  const assignedToOptions = useMemo(
+    () => Array.from(new Set(items.map(item => item.assignedTo).filter(Boolean))),
+    [items]
+  );
+  const stateOptions = useMemo(
+    () => Array.from(new Set(items.map(item => item.state).filter(Boolean))),
+    [items]
+  );
+  const filteredItems = useMemo(
+    () =>
+      items.filter(item =>
+        (assignedToFilter === 'All' || item.assignedTo === assignedToFilter) &&
+        (stateFilter === 'All' || item.state === stateFilter)
+      ),
+    [items, assignedToFilter, stateFilter]
   );
 
   if (loading) {
@@ -114,12 +123,8 @@ function Workitem({ project, release }) {
           <thead>
             <tr>
               <th>Title</th>
-              <th>
-                Assigned To
-              </th>
-              <th>
-                State
-              </th>
+              <th>Assigned To</th>
+              <th>State</th>
               <th>URL</th>
             </tr>
           </thead>
