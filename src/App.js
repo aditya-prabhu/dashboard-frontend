@@ -10,6 +10,7 @@ import Graph from './components/graph';
 import './App.css';
 import Grid from '@mui/joy/Grid';
 import Box from '@mui/joy/Box';
+import Yamlpage from "./pages/Yamlpage";
 
 function App() {
   const [selectedProject, setSelectedProject] = useState('');
@@ -97,6 +98,7 @@ function App() {
           </>
         }
       />
+      <Route path="/yaml-details/:definitionId" element={<Yamlpage />} />
     </Routes>
   );
 }
