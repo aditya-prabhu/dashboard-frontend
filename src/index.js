@@ -7,7 +7,6 @@ import { PublicClientApplication } from "@azure/msal-browser";
 import { MsalProvider } from "@azure/msal-react";
 import { msalConfig } from "./auth/authConfig";
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import SSOPage from './pages/SSOPage';
 import LoginPage from './pages/LoginPage';
 
 const msalInstance = new PublicClientApplication(msalConfig);
