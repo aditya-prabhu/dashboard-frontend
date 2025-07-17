@@ -15,6 +15,7 @@ import Link from "@mui/joy/Link";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
 import Tooltip from "@mui/material/Tooltip";
+import ModalClose from "@mui/joy/ModalClose";
 
 function Navbar({
   selectedProject,
@@ -260,7 +261,8 @@ function Navbar({
             boxShadow: "0 2px 16px 0 rgba(33,150,243,0.12)"
           }}
         >
-          <Typography level="h5" sx={{ mb: 2, color: "#1976d2" }}>YAML Pipeline Approvals</Typography>
+          <ModalClose onClick={() => setOpenYamlApprovals(false)} />
+          <Typography level="h5" sx={{ mb: 2, color: "#1976d2" }}>Pending Approvals</Typography>
           {yamlApprovalsLoading ? (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 80 }}>
               <CircularProgress />
