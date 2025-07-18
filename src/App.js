@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import PipelinesTable from './components/PipelinesTable';
@@ -16,6 +16,10 @@ function App() {
   const [selectedProject, setSelectedProject] = useState('');
   const [selectedRelease, setSelectedRelease] = useState(null);
   const showContent = selectedProject && selectedRelease;
+
+   useEffect(() => {
+    document.title = "Release management Dashboard";
+  }, []);
 
   return (
     <Routes>
