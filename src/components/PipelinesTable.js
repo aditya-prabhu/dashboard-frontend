@@ -160,11 +160,15 @@ function PipelinesTable({ project, release }) {
       </Typography>
       <Table
         aria-label="Pipelines Table"
-        sx={{ minWidth: 650, background: "#fff" }}
+        sx={{
+          background: "#fff",
+          borderRadius: 2,
+          boxShadow: "0 2px 8px 0 rgba(33,150,243,0.08)"
+        }}
         stickyHeader
       >
         <thead>
-          <tr>
+          <tr style={{ background: "#e3f2fd" }}>
             {pipelineType === "classic" ? (
               <>
                 <th style={{ display: "none" }}>Definition ID</th>
@@ -184,7 +188,7 @@ function PipelinesTable({ project, release }) {
         </thead>
         <tbody>
           {rows.map((row, idx) => (
-            <tr key={pipelineType === "classic" ? row.definitionId : row.id || idx}>
+            <tr key={row.id || idx} style={{ background: idx % 2 === 0 ? "#fff" : "#f8fafc" }}>
               {pipelineType === "classic" ? (
                 <>
                   <td style={{ display: "none" }}>{row.definitionId}</td>
